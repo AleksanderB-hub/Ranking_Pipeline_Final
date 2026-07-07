@@ -2,9 +2,7 @@
 
 Evaluates skill-extraction pipelines on [SKILL-XL](https://huggingface.co/datasets/TechWolf/Skill-XL) in which an **LLM ranks retrieved ESCO skill candidates by relevance**. For every job-description sentence, a dense retriever proposes the top-N skills from the [ESCO](https://esco.ec.europa.eu/) taxonomy (~13.9k labels); an LLM then returns the candidates it judges genuinely expressed, **ordered most-to-least central, by candidate index** — so it can never hallucinate or paraphrase a taxonomy label. An optional binary relevance **gate** filters out no-skill sentences first, optionally refined by an LLM cascade on its uncertain band.
 
-```
 ![Project Header Image](End-toend_diagram.png)
-```
 
 Because SKILL-XL grades each gold skill with a centrality `cluster` (1 = most central), rankings are scored with **graded NDCG** in addition to P/R/F1 and MAP — each in variants that separate retrieval ceiling, LLM ranking quality, and whole-population deployment value (details in [`summary.txt`](summary.txt), the full method reference).
 
