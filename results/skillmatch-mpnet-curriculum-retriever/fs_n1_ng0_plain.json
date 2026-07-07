@@ -1,0 +1,278 @@
+{
+  "config": {
+    "retrievers": [
+      "Aleksandruz/skillmatch-mpnet-curriculum-retriever"
+    ],
+    "gate": "Aleksandruz/Binary-Relevance-RoBERTa",
+    "gate_threshold": null,
+    "gate_llm_refine": false,
+    "gate_t_upper": 0.9,
+    "gate_audit_llm": "qwen-local",
+    "gate_audit_max_tokens": 150,
+    "n_shot": 1,
+    "fewshot_no_gold_shots": 0,
+    "fewshot_pool": "data/ranking_fewshot_pool.json",
+    "fewshot_selection": "diverse",
+    "fewshot_seed": 0,
+    "llms": [
+      "qwen-local"
+    ],
+    "llm_candidates": 20,
+    "llm_max_tokens": 512,
+    "qwen_thinking": false,
+    "k": [
+      5,
+      10
+    ],
+    "max_cluster_tier": 5,
+    "scoring": "all",
+    "dataset": "TechWolf/Skill-XL",
+    "split": "test",
+    "subset": null,
+    "esco_version": "1.1.0",
+    "esco_language": "en",
+    "no_add_missing_gold": false,
+    "data_even": false,
+    "data_even_seed": 0,
+    "batch_size": 64,
+    "device": "cuda",
+    "cache_dir": ".emb_cache",
+    "llm_cache_dir": ".llm_cache",
+    "output": "results/skillmatch-mpnet-curriculum-retriever/fs_n1_ng0_plain.json",
+    "predictions_dir": "results/predictions/skillmatch-mpnet-curriculum-retriever/fs_n1_ng0_plain"
+  },
+  "n_queries": 2641,
+  "scoring_primary": "all",
+  "gate_classification": {
+    "precision": 0.7286634460547504,
+    "recall": 0.9586864406779662,
+    "f1": 0.827996340347667,
+    "precision_macro": 0.8503931955077183,
+    "recall_macro": 0.8800503505688004,
+    "f1_macro": 0.8532746559619472,
+    "accuracy": 0.8576296857251041,
+    "tp": 905,
+    "fp": 337,
+    "fn": 39,
+    "tn": 1360
+  },
+  "gate_audit": null,
+  "models": {
+    "Aleksandruz/skillmatch-mpnet-curriculum-retriever": {
+      "diagnostics_relevant_only": {
+        "n_relevant_sentences": 944,
+        "mrr": 0.6056755608696416,
+        "map@5": 0.35204390301318267,
+        "recall@5": 0.4080518020196675,
+        "map@10": 0.36018936148690484,
+        "recall@10": 0.5219197933935853,
+        "map@20": 0.37755685896265867,
+        "recall@20": 0.6214294325557547
+      },
+      "baselines": {
+        "no_gate@5": {
+          "all": {
+            "precision": 0.10230973116243847,
+            "recall": 0.30257558790593503,
+            "f1": 0.15291454442558006,
+            "tp": 1351,
+            "fp": 11854,
+            "fn": 3114,
+            "n_sentences": 2641,
+            "avg_predictions": 5.0
+          },
+          "skill_bearing": {
+            "precision": 0.28622881355932206,
+            "recall": 0.30257558790593503,
+            "f1": 0.29417528579205227,
+            "tp": 1351,
+            "fp": 3369,
+            "fn": 3114,
+            "n_sentences": 944,
+            "avg_predictions": 5.0
+          }
+        },
+        "gated@5": {
+          "all": {
+            "precision": 0.20966183574879227,
+            "recall": 0.2916013437849944,
+            "f1": 0.24393442622950817,
+            "tp": 1302,
+            "fp": 4908,
+            "fn": 3163,
+            "n_sentences": 2641,
+            "avg_predictions": 2.3513820522529345
+          },
+          "skill_bearing": {
+            "precision": 0.28773480662983425,
+            "recall": 0.2916013437849944,
+            "f1": 0.2896551724137931,
+            "tp": 1302,
+            "fp": 3223,
+            "fn": 3163,
+            "n_sentences": 944,
+            "avg_predictions": 4.7934322033898304
+          }
+        },
+        "no_gate@10": {
+          "all": {
+            "precision": 0.06951912154486936,
+            "recall": 0.41119820828667414,
+            "f1": 0.11893117408906884,
+            "tp": 1836,
+            "fp": 24574,
+            "fn": 2629,
+            "n_sentences": 2641,
+            "avg_predictions": 10.0
+          },
+          "skill_bearing": {
+            "precision": 0.1944915254237288,
+            "recall": 0.41119820828667414,
+            "f1": 0.2640776699029126,
+            "tp": 1836,
+            "fp": 7604,
+            "fn": 2629,
+            "n_sentences": 944,
+            "avg_predictions": 10.0
+          }
+        },
+        "gated@10": {
+          "all": {
+            "precision": 0.142914653784219,
+            "recall": 0.3975363941769317,
+            "f1": 0.21024578027835356,
+            "tp": 1775,
+            "fp": 10645,
+            "fn": 2690,
+            "n_sentences": 2641,
+            "avg_predictions": 4.702764104505869
+          },
+          "skill_bearing": {
+            "precision": 0.19613259668508287,
+            "recall": 0.3975363941769317,
+            "f1": 0.2626711061783204,
+            "tp": 1775,
+            "fp": 7275,
+            "fn": 2690,
+            "n_sentences": 944,
+            "avg_predictions": 9.586864406779661
+          }
+        },
+        "retrieval_order_scores": {
+          "n_relevant_sentences": 944,
+          "n_sentences": 2641,
+          "ndcg_end_to_end@5": 0.4300504010367418,
+          "map_end_to_end@5": 0.35204390301318267,
+          "ndcg_given_candidates@5": 0.5634982380798202,
+          "map_given_candidates@5": 0.48091956292785676,
+          "ndcg_deployment@5": 0.15371737166932384,
+          "map_deployment@5": 0.1258347006605242,
+          "ndcg_end_to_end@10": 0.4675174281646195,
+          "map_end_to_end@10": 0.36018936148690484,
+          "ndcg_given_candidates@10": 0.6398649515324781,
+          "map_given_candidates@10": 0.5284170967623489,
+          "ndcg_deployment@10": 0.16710959946512713,
+          "map_deployment@10": 0.12874621629823485,
+          "ndcg_end_to_end@20": 0.5058671934833616,
+          "map_end_to_end@20": 0.37755685896265867,
+          "ndcg_given_candidates@20": 0.7025847709857811,
+          "map_given_candidates@20": 0.5650157421528199,
+          "ndcg_deployment@20": 0.1808173535207472,
+          "map_deployment@20": 0.13495406090903062
+        }
+      },
+      "llms": {
+        "qwen-local": {
+          "retrieval_llm": {
+            "all": {
+              "precision": 0.06372620048106181,
+              "recall": 0.49249720044792833,
+              "f1": 0.11285025146258852,
+              "tp": 2199,
+              "fp": 32308,
+              "fn": 2266,
+              "n_sentences": 2641,
+              "avg_predictions": 13.065884134797425
+            },
+            "skill_bearing": {
+              "precision": 0.15066803699897224,
+              "recall": 0.49249720044792833,
+              "f1": 0.23074501573976913,
+              "tp": 2199,
+              "fp": 12396,
+              "fn": 2266,
+              "n_sentences": 944,
+              "avg_predictions": 15.460805084745763
+            }
+          },
+          "retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.500756697244817,
+            "map_end_to_end@5": 0.42239436205273073,
+            "ndcg_given_candidates@5": 0.6771779161233857,
+            "map_given_candidates@5": 0.5991044628751975,
+            "ndcg_deployment@5": 0.3073511254067048,
+            "map_deployment@5": 0.27934126383104046,
+            "ndcg_end_to_end@10": 0.5225759133108806,
+            "map_end_to_end@10": 0.4188480186487652,
+            "ndcg_given_candidates@10": 0.7355325787284751,
+            "map_given_candidates@10": 0.6415621268474038,
+            "ndcg_deployment@10": 0.31515019392861465,
+            "map_deployment@10": 0.2780736575556359,
+            "ndcg_end_to_end@20": 0.539706127520335,
+            "map_end_to_end@20": 0.42487500191498884,
+            "ndcg_given_candidates@20": 0.7636437302400895,
+            "map_given_candidates@20": 0.659494097654045,
+            "ndcg_deployment@20": 0.32127322392245217,
+            "map_deployment@20": 0.2802279446451153
+          },
+          "gate_retrieval_llm": {
+            "all": {
+              "precision": 0.11465554592720971,
+              "recall": 0.47413213885778277,
+              "f1": 0.18465698460464916,
+              "tp": 2117,
+              "fp": 16347,
+              "fn": 2348,
+              "n_sentences": 2641,
+              "avg_predictions": 6.991291177584248
+            },
+            "skill_bearing": {
+              "precision": 0.1517018989609459,
+              "recall": 0.47413213885778277,
+              "f1": 0.22985884907709014,
+              "tp": 2117,
+              "fp": 11838,
+              "fn": 2348,
+              "n_sentences": 944,
+              "avg_predictions": 14.782838983050848
+            }
+          },
+          "gate_retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.4800374114142392,
+            "map_end_to_end@5": 0.4052568855932203,
+            "ndcg_given_candidates@5": 0.6506647507958214,
+            "map_given_candidates@5": 0.5765070431806213,
+            "ndcg_deployment@5": 0.6986578252082702,
+            "map_deployment@5": 0.6719282468761832,
+            "ndcg_end_to_end@10": 0.5006593048326168,
+            "map_end_to_end@10": 0.40121149782103677,
+            "ndcg_given_candidates@10": 0.7061587001509084,
+            "map_given_candidates@10": 0.6170139623999502,
+            "ndcg_deployment@10": 0.7060289222877661,
+            "map_deployment@10": 0.6704822620004008,
+            "ndcg_end_to_end@20": 0.5168938566775396,
+            "map_end_to_end@20": 0.40676341950121353,
+            "ndcg_given_candidates@20": 0.7328458405591212,
+            "map_given_candidates@20": 0.634096678304507,
+            "ndcg_deployment@20": 0.7118318064004534,
+            "map_deployment@20": 0.6724667429038794
+          }
+        }
+      }
+    }
+  }
+}

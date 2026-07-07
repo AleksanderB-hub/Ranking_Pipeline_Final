@@ -1,0 +1,103 @@
+{
+  "config": {
+    "retriever": "Aleksandruz/skillmatch-mpnet-curriculum-retriever",
+    "llm_candidates": 20,
+    "k": [
+      5,
+      10
+    ],
+    "max_cluster_tier": 5,
+    "tune_mode": "all",
+    "dev_dataset": "./data/development.csv",
+    "dataset": "TechWolf/Skill-XL",
+    "split": "test",
+    "subset": null,
+    "esco_version": "1.1.0",
+    "esco_language": "en",
+    "no_add_missing_gold": false,
+    "batch_size": 64,
+    "device": "cuda",
+    "cache_dir": ".emb_cache",
+    "output": "results/skillmatch-mpnet-curriculum-retriever/cos_threshold.json",
+    "baseline": "cos-thresh",
+    "tuned_tau": 0.5375149631500244,
+    "dev_f1": 0.18556975505857293
+  },
+  "n_queries": 2641,
+  "gate_classification": {
+    "precision": 0.44664371772805506,
+    "recall": 0.5497881355932204,
+    "f1": 0.4928774928774929,
+    "precision_macro": 0.5796436979444873,
+    "recall_macro": 0.5854420937247187,
+    "f1_macro": 0.5783027262876129,
+    "accuracy": 0.5956077243468383,
+    "tp": 519,
+    "fp": 643,
+    "fn": 425,
+    "tn": 1054
+  },
+  "models": {
+    "Aleksandruz/skillmatch-mpnet-curriculum-retriever": {
+      "diagnostics_relevant_only": {
+        "n_relevant_sentences": 944,
+        "mrr": 0.6056755608696416,
+        "map@5": 0.35204390301318267,
+        "recall@5": 0.4080518020196675,
+        "map@10": 0.36018936148690484,
+        "recall@10": 0.5219197933935853,
+        "map@20": 0.37755685896265867,
+        "recall@20": 0.6214294325557547
+      },
+      "baselines": {},
+      "llms": {
+        "cos-threshold": {
+          "retrieval_llm": {
+            "all": {
+              "precision": 0.1717687074829932,
+              "recall": 0.15834266517357223,
+              "f1": 0.16478265936371053,
+              "tp": 707,
+              "fp": 3409,
+              "fn": 3758,
+              "n_sentences": 2641,
+              "avg_predictions": 1.5585005679666792
+            },
+            "skill_bearing": {
+              "precision": 0.3570707070707071,
+              "recall": 0.15834266517357223,
+              "f1": 0.21939487975174557,
+              "tp": 707,
+              "fp": 1273,
+              "fn": 3758,
+              "n_sentences": 944,
+              "avg_predictions": 2.097457627118644
+            }
+          },
+          "retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.249685741446291,
+            "map_end_to_end@5": 0.2087588276836158,
+            "ndcg_given_candidates@5": 0.30857946740705183,
+            "map_given_candidates@5": 0.26732721169036333,
+            "ndcg_deployment@5": 0.48833901549613734,
+            "map_deployment@5": 0.4737100845639277,
+            "ndcg_end_to_end@10": 0.24872345068194143,
+            "map_end_to_end@10": 0.20307142837125436,
+            "ndcg_given_candidates@10": 0.314587128154993,
+            "map_given_candidates@10": 0.27026342297055733,
+            "ndcg_deployment@10": 0.48799505393553677,
+            "map_deployment@10": 0.47167717848635526,
+            "ndcg_end_to_end@20": 0.24891474396557073,
+            "map_end_to_end@20": 0.20271554194296013,
+            "ndcg_given_candidates@20": 0.3154285669511862,
+            "map_given_candidates@20": 0.27086316976838054,
+            "ndcg_deployment@20": 0.48806342987637213,
+            "map_deployment@20": 0.4715499703120615
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+# Core numerics / ML
+numpy
+torch
+sentence-transformers
+transformers
+scikit-learn
+
+# Data loading
+datasets
+pandas
+
+# ESCO download / caching
+requests
+appdirs
+
+# LLM providers (async clients)
+openai
+anthropic
+
+# Utilities
+tqdm
+python-dotenv

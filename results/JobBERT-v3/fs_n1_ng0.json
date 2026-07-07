@@ -1,0 +1,296 @@
+{
+  "config": {
+    "retrievers": [
+      "TechWolf/JobBERT-v3"
+    ],
+    "gate": "Aleksandruz/Binary-Relevance-RoBERTa",
+    "gate_threshold": null,
+    "gate_llm_refine": true,
+    "gate_t_upper": 0.9,
+    "gate_audit_llm": "qwen-local",
+    "gate_audit_max_tokens": 150,
+    "n_shot": 1,
+    "fewshot_no_gold_shots": 0,
+    "fewshot_pool": "data/ranking_fewshot_pool_jobbert_v3.json",
+    "fewshot_selection": "diverse",
+    "fewshot_seed": 0,
+    "llms": [
+      "qwen-local"
+    ],
+    "llm_candidates": 20,
+    "llm_max_tokens": 512,
+    "qwen_thinking": false,
+    "k": [
+      5,
+      10
+    ],
+    "max_cluster_tier": 5,
+    "scoring": "all",
+    "dataset": "TechWolf/Skill-XL",
+    "split": "test",
+    "subset": null,
+    "esco_version": "1.1.0",
+    "esco_language": "en",
+    "no_add_missing_gold": false,
+    "data_even": false,
+    "data_even_seed": 0,
+    "batch_size": 64,
+    "device": "cuda",
+    "cache_dir": ".emb_cache",
+    "llm_cache_dir": ".llm_cache",
+    "output": "results/JobBERT-v3/fs_n1_ng0.json",
+    "predictions_dir": "results/predictions/JobBERT-v3/fs_n1_ng0"
+  },
+  "n_queries": 2641,
+  "scoring_primary": "all",
+  "gate_classification": {
+    "precision": 0.8495197438633938,
+    "recall": 0.8432203389830508,
+    "f1": 0.8463583200425305,
+    "precision_macro": 0.8813326418847485,
+    "recall_macro": 0.8800662684897576,
+    "f1_macro": 0.8806916563458757,
+    "accuracy": 0.8905717531238168,
+    "tp": 796,
+    "fp": 141,
+    "fn": 148,
+    "tn": 1556
+  },
+  "gate_audit": {
+    "n_audited": 381,
+    "n_total": 2641,
+    "t_upper": 0.9,
+    "prompt_version": "gate-audit-v1",
+    "pre_refine_classification": {
+      "precision": 0.7286634460547504,
+      "recall": 0.9586864406779662,
+      "f1": 0.827996340347667,
+      "precision_macro": 0.8503931955077183,
+      "recall_macro": 0.8800503505688004,
+      "f1_macro": 0.8532746559619472,
+      "accuracy": 0.8576296857251041,
+      "tp": 905,
+      "fp": 337,
+      "fn": 39,
+      "tn": 1360
+    }
+  },
+  "models": {
+    "TechWolf/JobBERT-v3": {
+      "diagnostics_relevant_only": {
+        "n_relevant_sentences": 944,
+        "mrr": 0.35590762172808793,
+        "map@5": 0.16646333568738234,
+        "recall@5": 0.2128449026878738,
+        "map@10": 0.16983767721424728,
+        "recall@10": 0.2777043887415896,
+        "map@20": 0.17934991267112332,
+        "recall@20": 0.34996249459593803
+      },
+      "baselines": {
+        "no_gate@5": {
+          "all": {
+            "precision": 0.05051117001135933,
+            "recall": 0.14938409854423293,
+            "f1": 0.0754951895868704,
+            "tp": 667,
+            "fp": 12538,
+            "fn": 3798,
+            "n_sentences": 2641,
+            "avg_predictions": 5.0
+          },
+          "skill_bearing": {
+            "precision": 0.1413135593220339,
+            "recall": 0.14938409854423293,
+            "f1": 0.1452367991290147,
+            "tp": 667,
+            "fp": 4053,
+            "fn": 3798,
+            "n_sentences": 944,
+            "avg_predictions": 5.0
+          }
+        },
+        "gated@5": {
+          "all": {
+            "precision": 0.12145144076840982,
+            "recall": 0.12743561030235162,
+            "f1": 0.12437158469945356,
+            "tp": 569,
+            "fp": 4116,
+            "fn": 3896,
+            "n_sentences": 2641,
+            "avg_predictions": 1.773949261643317
+          },
+          "skill_bearing": {
+            "precision": 0.14296482412060302,
+            "recall": 0.12743561030235162,
+            "f1": 0.13475429248075785,
+            "tp": 569,
+            "fp": 3411,
+            "fn": 3896,
+            "n_sentences": 944,
+            "avg_predictions": 4.216101694915254
+          }
+        },
+        "no_gate@10": {
+          "all": {
+            "precision": 0.03513820522529345,
+            "recall": 0.20783874580067188,
+            "f1": 0.06011336032388664,
+            "tp": 928,
+            "fp": 25482,
+            "fn": 3537,
+            "n_sentences": 2641,
+            "avg_predictions": 10.0
+          },
+          "skill_bearing": {
+            "precision": 0.09830508474576272,
+            "recall": 0.20783874580067188,
+            "f1": 0.13347716648687524,
+            "tp": 928,
+            "fp": 8512,
+            "fn": 3537,
+            "n_sentences": 944,
+            "avg_predictions": 10.0
+          }
+        },
+        "gated@10": {
+          "all": {
+            "precision": 0.0855923159018143,
+            "recall": 0.1796192609182531,
+            "f1": 0.11593783881460065,
+            "tp": 802,
+            "fp": 8568,
+            "fn": 3663,
+            "n_sentences": 2641,
+            "avg_predictions": 3.547898523286634
+          },
+          "skill_bearing": {
+            "precision": 0.1007537688442211,
+            "recall": 0.1796192609182531,
+            "f1": 0.12909456740442657,
+            "tp": 802,
+            "fp": 7158,
+            "fn": 3663,
+            "n_sentences": 944,
+            "avg_predictions": 8.432203389830509
+          }
+        },
+        "retrieval_order_scores": {
+          "n_relevant_sentences": 944,
+          "n_sentences": 2641,
+          "ndcg_end_to_end@5": 0.21892682838945404,
+          "map_end_to_end@5": 0.16646333568738234,
+          "ndcg_given_candidates@5": 0.4580089032792601,
+          "map_given_candidates@5": 0.38232274277508527,
+          "ndcg_deployment@5": 0.07825328511913844,
+          "map_deployment@5": 0.059500715217299854,
+          "ndcg_end_to_end@10": 0.24200387261598696,
+          "map_end_to_end@10": 0.16983767721424728,
+          "ndcg_given_candidates@10": 0.5361063287823513,
+          "map_given_candidates@10": 0.4264223316323477,
+          "ndcg_deployment@10": 0.08650195219594536,
+          "map_deployment@10": 0.06070684107923114,
+          "ndcg_end_to_end@20": 0.26961964595632293,
+          "map_end_to_end@20": 0.17934991267112332,
+          "ndcg_given_candidates@20": 0.6097202411408028,
+          "map_given_candidates@20": 0.45971178688562603,
+          "ndcg_deployment@20": 0.09637294425701207,
+          "map_deployment@20": 0.0641068979786219
+        }
+      },
+      "llms": {
+        "qwen-local": {
+          "retrieval_llm": {
+            "all": {
+              "precision": 0.041179763487509624,
+              "recall": 0.2636058230683091,
+              "f1": 0.07123188186522227,
+              "tp": 1177,
+              "fp": 27405,
+              "fn": 3288,
+              "n_sentences": 2641,
+              "avg_predictions": 10.822415751609238
+            },
+            "skill_bearing": {
+              "precision": 0.0900260058130641,
+              "recall": 0.2636058230683091,
+              "f1": 0.13421517760419638,
+              "tp": 1177,
+              "fp": 11897,
+              "fn": 3288,
+              "n_sentences": 944,
+              "avg_predictions": 13.849576271186441
+            }
+          },
+          "retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.32713796328280226,
+            "map_end_to_end@5": 0.26777836629001883,
+            "ndcg_given_candidates@5": 0.7197562935539306,
+            "map_given_candidates@5": 0.6605344641895531,
+            "ndcg_deployment@5": 0.32367218377090695,
+            "map_deployment@5": 0.3024546678446716,
+            "ndcg_end_to_end@10": 0.3300047766592207,
+            "map_end_to_end@10": 0.25595052833986703,
+            "ndcg_given_candidates@10": 0.7606597036772065,
+            "map_given_candidates@10": 0.6889754874306571,
+            "ndcg_deployment@10": 0.3246968985862569,
+            "map_deployment@10": 0.29822692114836596,
+            "ndcg_end_to_end@20": 0.3353412364898827,
+            "map_end_to_end@20": 0.2562625894976918,
+            "ndcg_given_candidates@20": 0.7777768633902458,
+            "map_given_candidates@20": 0.6975335315398372,
+            "ndcg_deployment@20": 0.32660436472792476,
+            "map_deployment@20": 0.29833846440205264
+          },
+          "gate_retrieval_llm": {
+            "all": {
+              "precision": 0.07932969482665847,
+              "recall": 0.2311310190369541,
+              "f1": 0.11811834725878449,
+              "tp": 1032,
+              "fp": 11977,
+              "fn": 3433,
+              "n_sentences": 2641,
+              "avg_predictions": 4.925785687239682
+            },
+            "skill_bearing": {
+              "precision": 0.09249798332885184,
+              "recall": 0.2311310190369541,
+              "f1": 0.13212136730252208,
+              "tp": 1032,
+              "fp": 10125,
+              "fn": 3433,
+              "n_sentences": 944,
+              "avg_predictions": 11.81885593220339
+            }
+          },
+          "gate_retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.2833269224247533,
+            "map_end_to_end@5": 0.23251353578154424,
+            "ndcg_given_candidates@5": 0.6284795653651077,
+            "map_given_candidates@5": 0.5782601866810267,
+            "ndcg_deployment@5": 0.6946083357701504,
+            "map_deployment@5": 0.676445580377803,
+            "ndcg_end_to_end@10": 0.2836900446970501,
+            "map_end_to_end@10": 0.22004361696420563,
+            "ndcg_given_candidates@10": 0.6623555769014506,
+            "map_given_candidates@10": 0.6020729051807404,
+            "ndcg_deployment@10": 0.6947381303271546,
+            "map_deployment@10": 0.6719883280629345,
+            "ndcg_end_to_end@20": 0.2884047947962287,
+            "map_end_to_end@20": 0.2203570266215563,
+            "ndcg_given_candidates@20": 0.6774510893560388,
+            "map_given_candidates@20": 0.6097150161517124,
+            "ndcg_deployment@20": 0.6964233723164105,
+            "map_deployment@20": 0.6721003533247819
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# Secrets -- never commit API keys (copy API_keys.env.example instead)
+API_keys.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# On-disk caches (embeddings, LLM responses)
+.emb_cache/
+.llm_cache/
+
+# Run outputs (results/*.json is kept as the experiment record;
+# per-sentence traces are large and regenerable)
+predictions/
+results/predictions/
+llm_ranking_results*.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

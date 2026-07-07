@@ -1,0 +1,75 @@
+{
+  "config": {
+    "llm": "qwen-local",
+    "variants": [
+      "zero-shot",
+      "3shot",
+      "audit-v1"
+    ],
+    "dev_dataset": "./data/development.csv",
+    "dataset": "TechWolf/Skill-XL",
+    "split": "test",
+    "subset": null,
+    "max_tokens": 32,
+    "llm_cache_dir": ".llm_cache",
+    "output": "results/gate_baselines.json"
+  },
+  "n_queries": 2641,
+  "variants": {
+    "accept-all": {
+      "precision": 0.35744036349867475,
+      "recall": 1.0,
+      "f1": 0.5266387726638773,
+      "precision_macro": 0.17872018174933738,
+      "recall_macro": 0.5,
+      "f1_macro": 0.26331938633193863,
+      "accuracy": 0.35744036349867475,
+      "tp": 944,
+      "fp": 1697,
+      "fn": 0,
+      "tn": 0
+    },
+    "zero-shot": {
+      "precision": 0.35744036349867475,
+      "recall": 1.0,
+      "f1": 0.5266387726638773,
+      "precision_macro": 0.17872018174933738,
+      "recall_macro": 0.5,
+      "f1_macro": 0.26331938633193863,
+      "accuracy": 0.35744036349867475,
+      "tp": 944,
+      "fp": 1697,
+      "fn": 0,
+      "tn": 0,
+      "n_accepted": 2641
+    },
+    "3shot": {
+      "precision": 0.35744036349867475,
+      "recall": 1.0,
+      "f1": 0.5266387726638773,
+      "precision_macro": 0.17872018174933738,
+      "recall_macro": 0.5,
+      "f1_macro": 0.26331938633193863,
+      "accuracy": 0.35744036349867475,
+      "tp": 944,
+      "fp": 1697,
+      "fn": 0,
+      "tn": 0,
+      "n_accepted": 2641
+    },
+    "audit-v1": {
+      "precision": 0.7780040733197556,
+      "recall": 0.4046610169491525,
+      "f1": 0.532404181184669,
+      "precision_macro": 0.7583043622412732,
+      "recall_macro": 0.6702150105370395,
+      "f1_macro": 0.6789912769713311,
+      "accuracy": 0.7459295721317682,
+      "tp": 382,
+      "fp": 109,
+      "fn": 562,
+      "tn": 1588,
+      "n_accepted": 491
+    }
+  }
+}

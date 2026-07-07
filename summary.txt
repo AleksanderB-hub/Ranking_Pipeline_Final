@@ -1,0 +1,316 @@
+================================================================================
+LLM SKILL-RANKING PIPELINE — METHOD SUMMARY
+Reference document for external review / LLM-assisted assessment.
+Corresponds to the implementation in the Ranking_Pipeline_Final repository.
+================================================================================
+
+1. TASK AND DATA
+--------------------------------------------------------------------------------
+The task is sentence-level skill extraction from job postings: given one
+sentence of a job description, identify which skills from the ESCO taxonomy
+(European Skills, Competences, Qualifications and Occupations; v1.1.0 English,
+13,891 skill labels) the sentence genuinely expresses or requires, and rank
+them by how central they are to the sentence.
+
+Evaluation uses SKILL-XL (TechWolf/Skill-XL), a benchmark of job-posting
+sentences annotated with ESCO skills. Two properties of the dataset shape the
+whole method:
+
+  (a) Most sentences express NO skill at all. On the test split used here,
+      only 944 of 2,641 unique sentences (36%) carry at least one gold skill;
+      the rest are boilerplate, benefits, marketing copy, etc. A deployable
+      system must stay silent on these.
+  (b) Each gold skill carries a graded "cluster" label: cluster 1 = the skill
+      the sentence is most centrally about, cluster 2 = less central, and so
+      on (values up to ~12; 1-5 cover the vast majority). This makes the task
+      a GRADED RANKING problem, not just set prediction, and permits NDCG
+      evaluation rather than only P/R/F1.
+
+Duplicated dataset rows (one row per sentence-skill pair) are collapsed into
+unique (document, sentence) queries; a skill's cluster is the minimum (most
+central) value seen across duplicates. Sentences with empty gold sets are
+retained as negatives. A validation split (2,281 sentences, 799 gold-bearing)
+is reserved for few-shot demonstration mining.
+
+2. PIPELINE ARCHITECTURE
+--------------------------------------------------------------------------------
+Three stages, each independently swappable:
+
+STAGE 1 — RELEVANCE GATE (optional).
+A binary sequence classifier (fine-tuned RoBERTa,
+"Aleksandruz/Binary-Relevance-RoBERTa") scores each sentence for "expresses
+any extractable skill". Sentences below a decision threshold (0.54, stored in
+the model config) are dropped: the downstream output for them is forced empty.
+
+  Optional LLM CASCADE REFINEMENT of the gate: sentences the gate is
+  confident about are decided by the gate alone (auto-reject below the
+  threshold, auto-accept at/above an upper threshold t_upper=0.90); only the
+  uncertain band [threshold, t_upper) is routed to an LLM auditor. The
+  auditor uses a chain-of-thought prompt with explicit rules and worked
+  examples of false positives (educational credentials, generic sector
+  experience) and true positives (specific technical competencies), and must
+  terminate with "FINAL DECISION: RELEVANT" or "FINAL DECISION: NON-RELEVANT".
+  An unparseable reply conservatively keeps the sentence. On the test split,
+  381/2,641 sentences (14%) fell in the audit band. The refinement raised
+  standalone gate F1 from 0.8280 to 0.8464 (P=0.8495, R=0.8432; 937/2,641
+  sentences accepted), shifting the gate toward higher precision.
+
+STAGE 2 — DENSE RETRIEVAL.
+A sentence-transformer bi-encoder ("Aleksandruz/skillmatch-mpnet-curriculum-
+retriever") embeds the sentence and all 13,891 ESCO skill labels
+(L2-normalised); the top-N candidates by cosine similarity (N=20 throughout)
+are retrieved. Any gold label absent from the ESCO vocabulary is injected
+into the candidate pool ahead of time so the recall ceiling is not artificially
+capped by vocabulary mismatch. Retriever quality on this split (gold-bearing
+sentences only): Recall@20 = 0.621, MRR = 0.606, MAP@5 = 0.352. Recall@20 is
+the hard ceiling on everything downstream: skills the retriever misses can
+never be ranked.
+
+STAGE 3 — LLM RANKING (the core contribution).
+The LLM receives the sentence plus the numbered top-20 candidate list and
+must return ONLY a JSON object {"ranked": [<candidate numbers>]} containing
+the candidates it judges genuinely expressed, ordered most-to-least central,
+or an empty list if none apply. Crucially the model answers with candidate
+INDICES, never free text: it is structurally incapable of hallucinating or
+paraphrasing skill labels — every prediction is guaranteed to be a real
+taxonomy entry from the retrieved list. The LLM therefore performs joint
+SELECTION (which candidates are relevant, possibly none) and ORDERING (by
+centrality), subsuming both the binary accept/reject role of a cross-encoder
+ranker and the graded ordering the cluster labels allow us to score.
+
+Parsing is defensive: code fences, leaked reasoning traces (<think>...</think>),
+trailing prose, duplicate/out-of-range/non-integer indices are all handled;
+an unparseable reply yields an empty prediction. Decoding is greedy
+(temperature 0). The primary evaluated model is a locally served, quantised
+Qwen3-14B-AWQ (via vLLM, OpenAI-compatible API); the harness equally supports
+OpenAI and Anthropic APIs with per-provider concurrency and rate caps.
+
+IMPORTANT INTERACTION: the LLM runs on ALL sentences; gated pipeline variants
+are derived afterwards by masking gate-rejected sentences to empty output.
+The gate therefore never alters the LLM's judgments — it only suppresses
+them — which makes gated and ungated variants exactly comparable and halves
+evaluation cost. (In deployment the gate would run first and skip the LLM
+call for rejected sentences, cutting ~65% of LLM calls at the natural class
+distribution.)
+
+3. PROMPTING AND FEW-SHOT METHOD
+--------------------------------------------------------------------------------
+The system prompt defines the joint select-and-rank task, instructs the model
+to select a candidate only when the sentence clearly supports it ("do not
+guess"), explicitly permits the empty answer, and pins the JSON output format.
+The user turn presents the sentence and the numbered candidates and (prompt
+v2) restates the escape hatch at the decision point: 'If none of the
+candidates apply, return {"ranked": []}'. This one-line addition proved
+consequential (see Section 6).
+
+FEW-SHOT demonstrations are not hardcoded; they are mined from the validation
+split by a separate preparation step, for a reason specific to ranking: a
+demonstration must show the COMPLETE correct ranking for its own candidate
+list. If retrieval missed one of a demo sentence's gold skills, that skill
+could not appear in the demonstrated answer, silently teaching an incomplete
+ranking. The preparation step therefore retrieves each validation sentence's
+top-20 candidates with the same retriever, INJECTS any missed gold skills
+into the candidate list, and derives the correct answer (gold candidates
+ordered by cluster, tie-broken by list position, expressed as 1-based
+indices). The resulting pool separates:
+
+  - RANKING demos (sentence with >=1 gold skill; a real ordering to imitate),
+  - REJECTION demos (no-gold sentence; the correct answer is {"ranked": []}).
+
+At run time, n ranking demos and m rejection demos are drawn from disjoint
+pool subsets. Selection is deterministic by default ("diverse": ranking demos
+maximising the number of distinct cluster tiers spanned — a demo whose gold
+skills all share one tier demonstrates nothing about ordering; rejection
+demos preferring "hard" negatives that SKILL-XL flagged relevant despite
+mapping to no skill) or uniform random under a seed. Demos are injected as
+full user/assistant chat turns.
+
+4. EVALUATION METHODOLOGY
+--------------------------------------------------------------------------------
+Five pipelines are scored per retriever: (1) retrieval@k, (2) gate ->
+retrieval@k, (3) the retriever's own cosine ordering (reference point for
+"did LLM re-ranking help"), (4) retrieval -> LLM ranking, (5) gate ->
+retrieval -> LLM ranking.
+
+SET METRICS (ranked list treated as an unordered set): micro-averaged
+P/R/F1, in two regimes —
+  "all":            every sentence counts; any prediction on a no-gold
+                    sentence is a false positive (deployment-faithful);
+  "skill_bearing":  gold-bearing sentences only (pure extraction quality).
+The gap between the two regimes exposes over-prediction on irrelevant
+sentences. avg_preds (mean predictions per sentence) is reported as the
+verbosity gauge that makes precision/recall trade-offs interpretable.
+
+RANKING METRICS: NDCG@k (graded) and MAP@k (binary), k in {5,10,20}. The
+cluster label is mapped to a bounded relevance grade: grade = 6 - min(cluster,
+5), i.e. cluster 1 -> grade 5 down to cluster >=5 -> grade 1 (still relevant,
+never 0 — deep clusters are rare but genuinely gold). DCG uses LINEAR gain
+rather than 2^rel - 1, on the argument that cluster tiers are ordinal ranks,
+not magnitudes. Each metric comes in three variants that differ in what
+counts as the ideal answer and which sentences are averaged:
+
+  *_end_to_end@k       gold-bearing sentences only; the ideal is computed
+                       from ALL gold skills, so retrieval misses are
+                       penalised — whole-pipeline ranking quality.
+  *_given_candidates@k gold-bearing only; the ideal is restricted to gold
+                       skills actually present in the candidate list shown
+                       to the LLM — isolates LLM ranking skill from the
+                       retriever's recall ceiling. The e2e-vs-given_cand gap
+                       attributes losses to retrieval vs ranking.
+  *_deployment@k       ALL sentences; a no-gold sentence scores 1.0 if the
+                       pipeline predicted nothing, else 0.0. The only
+                       variant in which a gate's noise suppression is
+                       visible: the other two never look at no-gold
+                       sentences, and (because masking can only zero out a
+                       gold sentence, never improve it) the gate can only
+                       HURT e2e/given_cand, by construction.
+
+Retriever diagnostics (MAP@k, Recall@k, MRR on gold-bearing sentences) are
+reported separately as pure retrieval quality.
+
+An optional EVEN-SPLIT mode downsamples the majority class (seeded,
+reproducible) to a 50/50 gold/no-gold prior, to measure sensitivity of the
+prior-dependent metrics ("all"-regime F1, deployment NDCG/MAP) to class
+balance. Empirically the per-class behaviour was identical across priors
+(gold-bearing e2e 0.4379 vs 0.4381; no-gold correct-silence 0.921 vs 0.920),
+confirming that headline differences between priors are compositional, not
+behavioural.
+
+5. ENGINEERING / REPRODUCIBILITY
+--------------------------------------------------------------------------------
+- All LLM calls are async with per-model concurrency semaphores and optional
+  per-second rate caps (for API providers).
+- Two content-addressed disk caches make every experiment resumable and every
+  re-scoring free: (a) skill-vocabulary embeddings keyed by retriever name +
+  full vocabulary content; (b) every LLM decision keyed by SHA-256 of
+  (prompt version, thinking-mode variant, model id, sentence, exact candidate
+  list). The prompt version string encodes the few-shot configuration AND a
+  content fingerprint of the selected demonstrations, so a rebuilt pool can
+  never silently reuse answers produced under different demonstrations.
+  Caches store raw model answers only; metrics are always recomputed.
+- Determinism: greedy decoding, seeded few-shot sampling, seeded even-split
+  downsampling, deterministic "diverse" demo selection, order-preserving
+  subsetting.
+- Qwen "thinking" mode (extended reasoning before answering) is switchable
+  per run and partitions the cache, enabling a controlled reasoning-vs-direct
+  comparison at identical prompts.
+- Per-sentence JSON traces (gate score/decision, retrieved candidates with
+  cosine scores, the LLM's ranking annotated with gold clusters and grades)
+  are written for every run, supporting qualitative error analysis.
+
+6. KEY EMPIRICAL FINDINGS (test split, Qwen3-14B-AWQ, top-20 candidates)
+--------------------------------------------------------------------------------
+Few-shot grid: 9 configurations crossing ranking demos (n in {0,1,2,3}) with
+rejection demos (m in {0,1,2,3}), all with the refined gate, plus a
+plain-gate reference.
+
+(a) GOLD DEMOS TEACH RANKING; REJECTION DEMOS TEACH RESTRAINT. Ungated LLM
+    ranking quality (NDCG given-candidates@5) rises monotonically with
+    ranking demos: 0.653 (zero-shot) -> 0.677 (1 demo) -> 0.686 (3 demos).
+    But so does verbosity: 7.2 -> 13.1 -> 13.7 predictions/sentence, because
+    every gold-only demo shows a non-empty answer. Rejection demos reverse
+    the verbosity (n0+m1: 6.9 preds, best gated all-regime F1 = 0.266) at a
+    small cost in ranking quality. The two demo types thus tune opposite
+    failure modes, and the best mixture depends on the downstream consumer.
+
+(b) THE TRADE-OFF IS ASYMMETRIC. Moving from the best-ranking config (3 gold
+    + 2 rejection demos) to the best-F1 config (0 gold + 1 rejection demo)
+    costs ~1% relative in deployment NDCG@5 (0.7473 -> 0.7402) and ~4% in
+    end-to-end NDCG, but gains ~26% relative in all-regime F1 (0.211 ->
+    0.266) with precision nearly x2 (0.139 -> 0.212).
+
+(c) PROMPT PHRASING DID MUCH OF THE WORK. Adding the explicit empty-answer
+    example to the user turn (prompt v2) collapsed zero-shot over-prediction
+    (to ~7.2 preds/sentence ungated) and lifted zero-shot near the best
+    few-shot F1 (0.261 vs 0.266) — a single rejection demo adds only a
+    sliver on top of the explicit escape hatch.
+
+(d) THE GATE'S VALUE IS REAL BUT LIVES ONLY IN PRIOR-INCLUSIVE METRICS.
+    Ungated, the LLM stays correctly silent on only ~23% of no-gold
+    sentences; the gate raises correct silence to ~92%, at the cost of
+    zeroing ~16% of gold sentences (its false-rejection rate). Deployment
+    NDCG@5 rises 0.34 -> 0.75 with the gate while end-to-end NDCG falls
+    0.51 -> 0.44 — both numbers are the same trade seen from the two sides.
+
+(e) GATE REFINEMENT IS A PRECISION LEVER. The LLM-refined gate beats the
+    plain gate on deployment NDCG@5 (0.736 vs 0.683) and all-regime F1
+    (0.261 vs 0.244) but LOSES on end-to-end NDCG (0.409 vs 0.460), because
+    the audit rejects more borderline gold sentences. Refined vs plain is a
+    precision/recall choice, not a strict improvement. (The refined-vs-plain
+    delta is independent of the few-shot configuration, since the gate mask
+    never depends on it.)
+
+(f) LLM RE-RANKING BEATS THE RETRIEVER'S OWN ORDER. Ungated LLM ranking
+    improves NDCG@5 end-to-end over the raw cosine ordering (0.482-0.511 vs
+    0.430 across configs) and given-candidates (0.653-0.686 vs 0.564),
+    confirming the LLM adds genuine ordering signal beyond dense similarity.
+
+7. MAIN BENEFITS OF THE METHOD
+--------------------------------------------------------------------------------
+- HALLUCINATION-PROOF BY CONSTRUCTION: index-constrained answers make every
+  prediction a verbatim taxonomy entry; no post-hoc string matching to the
+  taxonomy is ever needed.
+- GRADED, ATTRIBUTABLE EVALUATION: the three-variant NDCG/MAP design cleanly
+  separates retrieval ceiling, LLM ranking skill, and whole-population
+  deployment value — including the gate's contribution, which standard
+  gold-only ranking metrics are structurally blind to.
+- MODULARITY: gate, retriever, and LLM are independent, swappable components;
+  the gate-as-mask design makes all pipeline variants share one LLM pass.
+- CHEAP, REPRODUCIBLE ABLATIONS: content-addressed caching plus deterministic
+  prompting means any re-scoring, subset run (e.g. even split), or gate
+  variant is nearly free after the first pass, and cache keys make cross-
+  configuration contamination impossible.
+- DEPLOYMENT REALISM: metrics are reported under the natural class prior
+  with no-gold sentences included; the gate additionally saves ~65% of LLM
+  calls at deployment.
+
+8. LIMITATIONS AND THREATS TO VALIDITY
+--------------------------------------------------------------------------------
+- RETRIEVAL CEILING: Recall@20 = 0.62 bounds end-to-end performance; ~38% of
+  gold skills are unrankable regardless of the LLM. The given-candidates
+  variant quantifies but does not remove this.
+- GATE FALSE REJECTIONS: ~16% of gold-bearing sentences are zeroed by the
+  (refined) gate; on gold-only metrics the gate is strictly harmful. The
+  refined gate trades further in this direction.
+- OVER-PREDICTION UNDER GOLD-ONLY PROMPTING remains the LLM's dominant
+  failure mode; it is mitigated (prompt v2, rejection demos, gate) rather
+  than solved.
+- GRADING ASSUMPTIONS: cluster->grade mapping compresses clusters >=5 into
+  one tier; duplicate-row clusters are aggregated by minimum; linear DCG
+  gain is a defensible but non-standard choice; results could shift under
+  alternative gain functions.
+- SCOPE: one dataset (SKILL-XL), one taxonomy version (ESCO 1.1.0), English
+  only, one primary LLM (quantised Qwen3-14B); API-model and cross-lingual
+  generality untested in the reported grid.
+- FEW-SHOT POOL COUPLING: demonstration candidate lists are retriever-
+  specific; changing the retriever requires rebuilding the pool for a clean
+  comparison.
+- PROMPT SENSITIVITY: finding (c) shows results are materially sensitive to
+  one sentence of prompt wording; conclusions about few-shot composition are
+  conditional on the v2 prompt.
+- SINGLE-SEED FEW-SHOT SELECTION: the deterministic "diverse" selection was
+  used for the main grid; variance across demo choices (random seeds) was
+  not exhaustively characterised.
+- NO-GOLD SCORING CONVENTION: the deployment variant scores no-gold
+  sentences binarily (silence = 1.0, anything = 0.0), which weights a
+  one-skill mistake on an irrelevant sentence the same as twenty.
+- CACHING ASSUMES DETERMINISM: greedy decoding is treated as deterministic;
+  provider-side nondeterminism (e.g. batching effects) would be frozen into
+  the cache rather than averaged over.
+
+9. GLOSSARY
+--------------------------------------------------------------------------------
+ESCO            European multilingual skills/occupations taxonomy; the label
+                space (13,891 skill preferred labels in v1.1.0 EN).
+SKILL-XL        Benchmark of job-posting sentences with graded ESCO labels.
+cluster         Per-gold-skill centrality grade in SKILL-XL (1 = most central).
+gate            Binary sentence-level relevance classifier (skill vs no-skill).
+gate refinement LLM cascade auditing the gate's uncertain probability band.
+ranking demo    Few-shot example with a real gold ordering to imitate.
+rejection demo  Few-shot example whose correct answer is the empty list.
+e2e             NDCG/MAP variant penalising retrieval misses (ideal = all gold).
+given_cand      Variant conditioning on the retrieved candidates (LLM skill).
+deployment      Variant over all sentences; correct silence on no-gold = 1.0.
+all / skill_bearing   F1 regimes: with / without no-gold sentences counted.
+avg_preds       Mean number of predicted skills per sentence (verbosity).
+================================================================================

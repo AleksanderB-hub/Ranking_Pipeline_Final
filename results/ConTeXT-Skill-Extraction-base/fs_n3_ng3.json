@@ -1,0 +1,296 @@
+{
+  "config": {
+    "retrievers": [
+      "TechWolf/ConTeXT-Skill-Extraction-base"
+    ],
+    "gate": "Aleksandruz/Binary-Relevance-RoBERTa",
+    "gate_threshold": null,
+    "gate_llm_refine": true,
+    "gate_t_upper": 0.9,
+    "gate_audit_llm": "qwen-local",
+    "gate_audit_max_tokens": 150,
+    "n_shot": 3,
+    "fewshot_no_gold_shots": 3,
+    "fewshot_pool": "data/ranking_fewshot_pool_ConTeXT.json",
+    "fewshot_selection": "diverse",
+    "fewshot_seed": 0,
+    "llms": [
+      "qwen-local"
+    ],
+    "llm_candidates": 20,
+    "llm_max_tokens": 512,
+    "qwen_thinking": false,
+    "k": [
+      5,
+      10
+    ],
+    "max_cluster_tier": 5,
+    "scoring": "all",
+    "dataset": "TechWolf/Skill-XL",
+    "split": "test",
+    "subset": null,
+    "esco_version": "1.1.0",
+    "esco_language": "en",
+    "no_add_missing_gold": false,
+    "data_even": false,
+    "data_even_seed": 0,
+    "batch_size": 64,
+    "device": "cuda",
+    "cache_dir": ".emb_cache",
+    "llm_cache_dir": ".llm_cache",
+    "output": "results/ConTeXT-Skill-Extraction-base/fs_n3_ng3.json",
+    "predictions_dir": "results/predictions/ConTeXT-Skill-Extraction-base/fs_n3_ng3"
+  },
+  "n_queries": 2641,
+  "scoring_primary": "all",
+  "gate_classification": {
+    "precision": 0.8495197438633938,
+    "recall": 0.8432203389830508,
+    "f1": 0.8463583200425305,
+    "precision_macro": 0.8813326418847485,
+    "recall_macro": 0.8800662684897576,
+    "f1_macro": 0.8806916563458757,
+    "accuracy": 0.8905717531238168,
+    "tp": 796,
+    "fp": 141,
+    "fn": 148,
+    "tn": 1556
+  },
+  "gate_audit": {
+    "n_audited": 381,
+    "n_total": 2641,
+    "t_upper": 0.9,
+    "prompt_version": "gate-audit-v1",
+    "pre_refine_classification": {
+      "precision": 0.7286634460547504,
+      "recall": 0.9586864406779662,
+      "f1": 0.827996340347667,
+      "precision_macro": 0.8503931955077183,
+      "recall_macro": 0.8800503505688004,
+      "f1_macro": 0.8532746559619472,
+      "accuracy": 0.8576296857251041,
+      "tp": 905,
+      "fp": 337,
+      "fn": 39,
+      "tn": 1360
+    }
+  },
+  "models": {
+    "TechWolf/ConTeXT-Skill-Extraction-base": {
+      "diagnostics_relevant_only": {
+        "n_relevant_sentences": 944,
+        "mrr": 0.5620657076517291,
+        "map@5": 0.3048490466101695,
+        "recall@5": 0.36497077926002436,
+        "map@10": 0.3100605488684017,
+        "recall@10": 0.45971353536903486,
+        "map@20": 0.32718936858957254,
+        "recall@20": 0.5719118635072404
+      },
+      "baselines": {
+        "no_gate@5": {
+          "all": {
+            "precision": 0.08920863309352518,
+            "recall": 0.26382978723404255,
+            "f1": 0.13333333333333333,
+            "tp": 1178,
+            "fp": 12027,
+            "fn": 3287,
+            "n_sentences": 2641,
+            "avg_predictions": 5.0
+          },
+          "skill_bearing": {
+            "precision": 0.24957627118644068,
+            "recall": 0.26382978723404255,
+            "f1": 0.25650517147523133,
+            "tp": 1178,
+            "fp": 3542,
+            "fn": 3287,
+            "n_sentences": 944,
+            "avg_predictions": 5.0
+          }
+        },
+        "gated@5": {
+          "all": {
+            "precision": 0.22177161152614727,
+            "recall": 0.23269876819708846,
+            "f1": 0.22710382513661204,
+            "tp": 1039,
+            "fp": 3646,
+            "fn": 3426,
+            "n_sentences": 2641,
+            "avg_predictions": 1.773949261643317
+          },
+          "skill_bearing": {
+            "precision": 0.26105527638190956,
+            "recall": 0.23269876819708846,
+            "f1": 0.24606275902901126,
+            "tp": 1039,
+            "fp": 2941,
+            "fn": 3426,
+            "n_sentences": 944,
+            "avg_predictions": 4.216101694915254
+          }
+        },
+        "no_gate@10": {
+          "all": {
+            "precision": 0.060166603559257854,
+            "recall": 0.3558790593505039,
+            "f1": 0.10293117408906882,
+            "tp": 1589,
+            "fp": 24821,
+            "fn": 2876,
+            "n_sentences": 2641,
+            "avg_predictions": 10.0
+          },
+          "skill_bearing": {
+            "precision": 0.16832627118644067,
+            "recall": 0.3558790593505039,
+            "f1": 0.22855088097806547,
+            "tp": 1589,
+            "fp": 7851,
+            "fn": 2876,
+            "n_sentences": 944,
+            "avg_predictions": 10.0
+          }
+        },
+        "gated@10": {
+          "all": {
+            "precision": 0.14941302027748132,
+            "recall": 0.3135498320268757,
+            "f1": 0.2023852547885797,
+            "tp": 1400,
+            "fp": 7970,
+            "fn": 3065,
+            "n_sentences": 2641,
+            "avg_predictions": 3.547898523286634
+          },
+          "skill_bearing": {
+            "precision": 0.17587939698492464,
+            "recall": 0.3135498320268757,
+            "f1": 0.22535211267605637,
+            "tp": 1400,
+            "fp": 6560,
+            "fn": 3065,
+            "n_sentences": 944,
+            "avg_predictions": 8.432203389830509
+          }
+        },
+        "retrieval_order_scores": {
+          "n_relevant_sentences": 944,
+          "n_sentences": 2641,
+          "ndcg_end_to_end@5": 0.38267395902023477,
+          "map_end_to_end@5": 0.3048490466101695,
+          "ndcg_given_candidates@5": 0.5312219865204342,
+          "map_given_candidates@5": 0.4462783138989412,
+          "ndcg_deployment@5": 0.13678311901366966,
+          "map_deployment@5": 0.10896535403256344,
+          "ndcg_end_to_end@10": 0.4147540120816465,
+          "map_end_to_end@10": 0.3100605488684017,
+          "ndcg_given_candidates@10": 0.603640599031604,
+          "map_given_candidates@10": 0.490667644844651,
+          "ndcg_deployment@10": 0.14824982484099744,
+          "map_deployment@10": 0.11082815529412011,
+          "ndcg_end_to_end@20": 0.45632545118082063,
+          "map_end_to_end@20": 0.32718936858957254,
+          "ndcg_given_candidates@20": 0.6744118375189783,
+          "map_given_candidates@20": 0.5282084007785315,
+          "ndcg_deployment@20": 0.1631091351437693,
+          "map_deployment@20": 0.11695068684155865
+        }
+      },
+      "llms": {
+        "qwen-local": {
+          "retrieval_llm": {
+            "all": {
+              "precision": 0.06038381615939372,
+              "recall": 0.4425531914893617,
+              "f1": 0.10626798246793408,
+              "tp": 1976,
+              "fp": 30748,
+              "fn": 2489,
+              "n_sentences": 2641,
+              "avg_predictions": 12.390761075350246
+            },
+            "skill_bearing": {
+              "precision": 0.13985420058036663,
+              "recall": 0.4425531914893617,
+              "f1": 0.21254168011186403,
+              "tp": 1976,
+              "fp": 12153,
+              "fn": 2489,
+              "n_sentences": 944,
+              "avg_predictions": 14.967161016949152
+            }
+          },
+          "retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.48308098484169315,
+            "map_end_to_end@5": 0.4056635475517891,
+            "ndcg_given_candidates@5": 0.6890814860388025,
+            "map_given_candidates@5": 0.6169896796676049,
+            "ndcg_deployment@5": 0.3279168684932065,
+            "map_deployment@5": 0.3002447515671673,
+            "ndcg_end_to_end@10": 0.5008287063151177,
+            "map_end_to_end@10": 0.39897297441026,
+            "ndcg_given_candidates@10": 0.7461305138917129,
+            "map_given_candidates@10": 0.6578000682916244,
+            "ndcg_deployment@10": 0.3342606205079406,
+            "map_deployment@10": 0.2978532706714447,
+            "ndcg_end_to_end@20": 0.511917517831672,
+            "map_end_to_end@20": 0.4018202725822461,
+            "ndcg_given_candidates@20": 0.7672957903402401,
+            "map_given_candidates@20": 0.6705333603528323,
+            "ndcg_deployment@20": 0.33822420932718605,
+            "map_deployment@20": 0.2988710099650285
+          },
+          "gate_retrieval_llm": {
+            "all": {
+              "precision": 0.12544207867195958,
+              "recall": 0.38924972004479286,
+              "f1": 0.18973799126637556,
+              "tp": 1738,
+              "fp": 12117,
+              "fn": 2727,
+              "n_sentences": 2641,
+              "avg_predictions": 5.246118894358197
+            },
+            "skill_bearing": {
+              "precision": 0.14568315171835708,
+              "recall": 0.38924972004479286,
+              "f1": 0.21201585849344312,
+              "tp": 1738,
+              "fp": 10192,
+              "fn": 2727,
+              "n_sentences": 944,
+              "avg_predictions": 12.63771186440678
+            }
+          },
+          "gate_retrieval_llm_scores": {
+            "n_relevant_sentences": 944,
+            "n_sentences": 2641,
+            "ndcg_end_to_end@5": 0.41442237569755636,
+            "map_end_to_end@5": 0.3476200564971751,
+            "ndcg_given_candidates@5": 0.5953462129418092,
+            "map_given_candidates@5": 0.5324091944779521,
+            "ndcg_deployment@5": 0.739195275523852,
+            "map_deployment@5": 0.7153174302663132,
+            "ndcg_end_to_end@10": 0.4279552559717165,
+            "map_end_to_end@10": 0.33946458530838575,
+            "ndcg_given_candidates@10": 0.6441802912830317,
+            "map_given_candidates@10": 0.5680117085032645,
+            "ndcg_deployment@10": 0.744032473168232,
+            "map_deployment@10": 0.7124023356800894,
+            "ndcg_end_to_end@20": 0.43690677592700256,
+            "map_end_to_end@20": 0.3415163567781286,
+            "ndcg_given_candidates@20": 0.6622069817094115,
+            "map_given_candidates@20": 0.5792159553713043,
+            "ndcg_deployment@20": 0.7472321077149149,
+            "map_deployment@20": 0.7131357216200506
+          }
+        }
+      }
+    }
+  }
+}
