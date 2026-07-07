@@ -183,4 +183,4 @@ summary.txt                      Full method description (reference for the pape
 
 ## Data note
 
-`data/development.csv` and the few-shot pools derive from [TechWolf/Skill-XL](https://huggingface.co/datasets/TechWolf/Skill-XL); ESCO labels are © European Union (ESCO v1.1.0), downloaded automatically from the official API. Check both licences before making this repository public.
+`data/development.csv` and the few-shot pools derive from [TechWolf/Skill-XL](https://huggingface.co/datasets/TechWolf/Skill-XL); ESCO labels are © European Union (ESCO v1.1.0), downloaded automatically from the official API.
