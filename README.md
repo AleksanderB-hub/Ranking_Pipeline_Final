@@ -1,6 +1,6 @@
 # LLM Skill-Ranking Pipeline
 
-Evaluates skill-extraction pipelines on [SKILL-XL](https://huggingface.co/datasets/TechWolf/Skill-XL) in which an **LLM ranks retrieved ESCO skill candidates by relevance**. For every job-description sentence, a dense retriever proposes the top-N skills from the [ESCO](https://esco.ec.europa.eu/) taxonomy (~13.9k labels); an LLM then returns the candidates it judges genuinely expressed, **ordered most-to-least central, by candidate index** — so it can never hallucinate or paraphrase a taxonomy label. An optional binary relevance **gate** filters out no-skill sentences first, optionally refined by an LLM cascade on its uncertain band.
+Evaluates skill-extraction pipelines on [SKILL-XL](https://huggingface.co/datasets/TechWolf/Skill-XL) in which an **LLM ranks retrieved ESCO skill candidates by relevance**. For every job-description sentence, a dense retriever proposes the top-N skills from the [ESCO](https://esco.ec.europa.eu/) taxonomy (~13.9k labels); an LLM then returns the candidates it judges genuinely expressed, **ordered most-to-least central, by candidate index**, so it can never hallucinate or paraphrase a taxonomy label. An optional binary relevance **gate** filters out no-skill sentences first, optionally refined by an LLM cascade on its uncertain band.
 
 ![Project Header Image](End-to-end_diagram.png)
 
